@@ -5,6 +5,8 @@ from math import *
 from discord.ext import commands
 import random
 import openai
+import time
+
 
 #variables
 messages=[
@@ -12,6 +14,19 @@ messages=[
         {"role": "user", "content": "You are a middle school teacher."},
         {"role": "assistant", "content": "Sure. I would like!"},
     ]
+
+# Goal: Reset the conversation after 5 minutes
+chat_timestamp = time.time() # time of last chat message
+
+def resetConversationIfExpired():
+    global chat_timestamp
+    global messages
+    cur_time = time.time()
+    if cur_time - chat_timestamp > 300: # reset history message
+        messages = messages[:3]
+        print("Resetting conversation history")
+    chat_timestamp = cur_time
+
 
 magic_list = ["yes ma'am", "no sir", "maybe", "dunno", "what the heck did you just say", "so so who knows", "bro your stupid no", "bruh obviously"]
 
@@ -22,6 +37,7 @@ c_token = os.getenv("C_TOKEN")
 openai.api_key = c_token
 
 def chat(inp):
+  resetConversationIfExpired()
   messages.append({"role": "user", "content": inp})
   response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
