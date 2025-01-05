@@ -6,7 +6,7 @@ from discord.ext import commands
 import random
 import openai
 import time
-
+from Bard import Chatbot
 
 #variables
 messages=[
@@ -22,7 +22,7 @@ def resetConversationIfExpired():
     global chat_timestamp
     global messages
     cur_time = time.time()
-    if cur_time - chat_timestamp > 300: # reset history message
+    if cur_time - chat_timestamp > 10: # reset history message
         messages = messages[:3]
         print("Resetting conversation history")
     chat_timestamp = cur_time
@@ -33,6 +33,10 @@ magic_list = ["yes ma'am", "no sir", "maybe", "dunno", "what the heck did you ju
 #chat gpt
 load_dotenv("C_TOKEN")
 c_token = os.getenv("C_TOKEN")
+
+load_dotenv("B_Token")
+b_token = os.getenv("B_TOKEN")
+bard_bot = Chatbot(b_token)
 
 openai.api_key = c_token
 
@@ -45,6 +49,10 @@ def chat(inp):
   )
   messages.append(response.choices[0].message)
   return (response.choices[0].message.content)
+
+def bard_chat(inp):
+    resp = bard_bot.ask(inp)
+    return resp['content']
 
 #create intents
 intents = discord.Intents.default()
@@ -74,6 +82,10 @@ async def math(ctx, *, arg):
 @bot.command(help="chat gpt for yall nerds")
 async def ai(ctx, *, arg):
     await ctx.send(chat(arg))
+
+@bot.command(help="bard for yall nerds")
+async def bard(ctx, *, arg):
+    await ctx.send(bard_chat(arg))
 
 
 bot.run(token)
